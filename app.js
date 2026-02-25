@@ -4,7 +4,6 @@ const form = document.getElementById("expense-form");
 const list = document.getElementById("expense-list");
 const emptyMsg = document.getElementById("empty-msg");
 const filterCategory = document.getElementById("filter-category");
-const filterMonth = document.getElementById("filter-month");
 
 document.getElementById("date").valueAsDate = new Date();
 
@@ -14,11 +13,6 @@ function save() {
 
 function formatCurrency(amount) {
     return "₹" + parseFloat(amount).toFixed(2);
-}
-
-function getMonthLabel(dateStr) {
-    const d = new Date(dateStr);
-    return d.toLocaleString("default", { month: "long", year: "numeric" });
 }
 
 function getCurrentMonthKey() {
@@ -47,9 +41,7 @@ function updateCategoryBreakdown() {
         totals[e.category] = (totals[e.category] || 0) + e.amount;
     });
 
-    const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0);
-
-    if (grandTotal === 0) {
+    if (Object.keys(totals).length === 0) {
         container.textContent = "No data yet.";
         return;
     }
@@ -57,16 +49,11 @@ function updateCategoryBreakdown() {
     const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
 
     sorted.forEach(([cat, amt]) => {
-        const pct = grandTotal > 0 ? (amt / grandTotal) * 100 : 0;
-
         const row = document.createElement("div");
         row.className = "cat-row";
 
         row.innerHTML = `
             <span class="cat-label">${cat}</span>
-            <div class="cat-bar-wrap">
-                <div class="cat-bar" style="width: ${pct.toFixed(1)}%"></div>
-            </div>
             <span class="cat-amount">${formatCurrency(amt)}</span>
         `;
 
@@ -74,30 +61,12 @@ function updateCategoryBreakdown() {
     });
 }
 
-function populateMonthFilter() {
-    const months = [...new Set(expenses.map(e => e.date.slice(0, 7)))].sort().reverse();
-    const current = filterMonth.value;
-
-    filterMonth.innerHTML = `<option value="All">All Months</option>`;
-    months.forEach(m => {
-        const label = getMonthLabel(m + "-01");
-        const opt = document.createElement("option");
-        opt.value = m;
-        opt.textContent = label;
-        filterMonth.appendChild(opt);
-    });
-
-    if (months.includes(current)) filterMonth.value = current;
-}
-
 function renderList() {
     const catFilter = filterCategory.value;
-    const monthFilter = filterMonth.value;
 
     let filtered = expenses.filter(e => {
         const catOk = catFilter === "All" || e.category === catFilter;
-        const monthOk = monthFilter === "All" || e.date.startsWith(monthFilter);
-        return catOk && monthOk;
+        return catOk;
     });
 
     filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -126,7 +95,6 @@ function renderList() {
 
     updateSummary();
     updateCategoryBreakdown();
-    populateMonthFilter();
 }
 
 form.addEventListener("submit", function (e) {
@@ -173,6 +141,5 @@ document.getElementById("clear-all").addEventListener("click", function () {
 });
 
 filterCategory.addEventListener("change", renderList);
-filterMonth.addEventListener("change", renderList);
 
 renderList();
