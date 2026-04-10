@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseTracker – Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-icon-sm">₹</div>
+            <span>ExpenseTracker</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="nav-link active" data-page="overview" onclick="showPage('overview')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                    </svg>
+                    Dashboard
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="expenses" onclick="showPage('expenses')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23" />
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                    Expenses
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="budget" onclick="showPage('budget')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                        <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
+                    </svg>
+                    Budget
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="analytics" onclick="showPage('analytics')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10" />
+                        <line x1="12" y1="20" x2="12" y2="4" />
+                        <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
+                    Analytics
+                </a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <span id="user-display-name">User</span>
+            </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="top-bar">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h2 id="page-title">Dashboard</h2>
+            <div class="header-right">
+                <span id="current-date"></span>
+                <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- PAGE: Overview/Dashboard -->
+        <div class="page active" id="page-overview">
+            <div class="summary-grid">
+                <div class="summary-card card-balance">
+                    <div class="card-icon">💎</div>
+                    <div class="card-info">
+                        <span>Balance</span>
+                        <strong id="total-balance">₹0.00</strong>
+                    </div>
+                </div>
+                <div class="summary-card card-income">
+                    <div class="card-icon">💰</div>
+                    <div class="card-info">
+                        <span>Total Income</span>
+                        <strong id="total-income">₹0.00</strong>
+                    </div>
+                </div>
+                <div class="summary-card card-total">
+                    <div class="card-icon">📊</div>
+                    <div class="card-info">
+                        <span>Total Expenses</span>
+                        <strong id="total-all">₹0.00</strong>
+                    </div>
+                </div>
+                <div class="summary-card card-count">
+                    <div class="card-icon">🧾</div>
+                    <div class="card-info">
+                        <span>Entries</span>
+                        <strong id="total-count">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Add + Chart Row -->
+            <div class="dashboard-row">
+                <div class="panel panel-form">
+                    <h3>Quick Add Transaction</h3>
+                    <form id="expense-form">
+                        <div class="type-toggle">
+                            <button type="button" class="type-btn active" id="type-expense" onclick="setTransactionType('expense')">Expense</button>
+                            <button type="button" class="type-btn" id="type-income" onclick="setTransactionType('income')">Income</button>
+                        </div>
+                        <input type="hidden" id="transaction-type" value="expense">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <input type="text" id="description" placeholder="e.g. Grocery shopping" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="amount">Amount (₹)</label>
+                                <input type="number" id="amount" placeholder="0.00" min="0.01" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select id="category" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="Food">Food</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Housing">Housing</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Utilities">Utilities</option>
+                                    <option value="Salary">Salary</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="date">Date</label>
+                                <input type="date" id="date" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary" id="add-btn">+ Add Expense</button>
+                    </form>
+                </div>
+                <div class="panel panel-chart">
+                    <h3>Category Breakdown</h3>
+                    <div class="chart-container">
+                        <canvas id="pie-chart"></canvas>
+                    </div>
+                    <p id="no-chart-data" class="muted-text" style="display:none;">No expenses to visualize yet.</p>
+                </div>
+            </div>
+
+            <!-- Smart Insights -->
+            <div class="panel insights-panel" id="insights-panel">
+                <div class="panel-header">
+                    <h3>💡 Smart Insights</h3>
+                </div>
+                <div id="insights-container" class="insights-container">
+                    <p class="muted-text">Add some transactions to see smart insights.</p>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>Recent Transactions</h3>
+                    <a href="#" onclick="showPage('expenses')" class="link-btn">View All →</a>
+                </div>
+                <table id="recent-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-list"></tbody>
+                </table>
+                <p id="recent-empty" class="muted-text">No transactions recorded yet.</p>
+            </div>
+        </div>
+
+        <!-- PAGE: Expenses -->
+        <div class="page" id="page-expenses">
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>All Transactions</h3>
+                    <div class="filters">
+                        <select id="filter-type">
+                            <option value="All">All Types</option>
+                            <option value="expense">Expenses</option>
+                            <option value="income">Income</option>
+                        </select>
+                        <select id="filter-category">
+                            <option value="All">All Categories</option>
+                            <option value="Food">Food</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Housing">Housing</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Education">Education</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Salary">Salary</option>
+                            <option value="Freelance">Freelance</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <select id="filter-period">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                        <select id="sort-by">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="highest">Highest Amount</option>
+                            <option value="lowest">Lowest Amount</option>
+                        </select>
+                        <button id="export-csv" class="btn-export" onclick="exportToCSV()">📥 Export CSV</button>
+                        <button id="clear-all" class="btn-danger">Clear All</button>
+                    </div>
+                </div>
+                <div class="filter-summary" id="filter-summary"></div>
+                <table id="expense-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expense-list"></tbody>
+                </table>
+                <p id="empty-msg" class="muted-text">No transactions found.</p>
+            </div>
+        </div>
+
+        <!-- PAGE: Budget -->
+        <div class="page" id="page-budget">
+            <div class="panel">
+                <h3>Set Monthly Budgets by Category</h3>
+                <p class="muted-text" style="margin-bottom:16px;">Set spending limits for each category. The progress
+                    bar shows how much of your budget you've used this month.</p>
+                <div id="budget-list" class="budget-grid"></div>
+            </div>
+        </div>
+
+        <!-- PAGE: Analytics -->
+        <div class="page" id="page-analytics">
+            <div class="analytics-controls">
+                <div class="form-group" style="max-width:200px;">
+                    <label for="analytics-period">Time Period</label>
+                    <select id="analytics-period" onchange="updateAnalytics()">
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+            </div>
+            <div class="analytics-grid">
+                <div class="panel">
+                    <h3>Spending by Category</h3>
+                    <div class="chart-container-lg">
+                        <canvas id="analytics-pie"></canvas>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3>Monthly Spending Trend</h3>
+                    <div class="chart-container-lg">
+                        <canvas id="analytics-bar"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <h3>Category Breakdown</h3>
+                <div id="analytics-breakdown" class="category-breakdown-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay hidden" id="edit-modal">
+        <div class="modal">
+            <h3>Edit Transaction</h3>
+            <form id="edit-form" onsubmit="saveEdit(event)">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="edit-type" required>
+                        <option value="expense">Expense</option>
+                        <option value="income">Income</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="edit-description" required>
+                </div>
+                <div class="form-group">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="edit-amount" min="0.01" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="edit-category" required>
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Education">Education</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Salary">Salary</option>
+                        <option value="Freelance">Freelance</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="edit-date" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker – Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="login-body">
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="logo-icon">₹</div>
+                <h1>ExpenseTracker</h1>
+                <p class="login-subtitle">Manage your finances smartly</p>
+            </div>
+
+            <div class="tab-switch">
+                <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+                <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+                <p id="login-error" class="form-error"></p>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signup-form" class="auth-form hidden" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label for="signup-fullname">Full Name</label>
+                    <input type="text" id="signup-fullname" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a password" minlength="4" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+                <p id="signup-error" class="form-error"></p>
+                <p id="signup-success" class="form-success"></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check if already logged in
+        if (localStorage.getItem("currentUser")) {
+            window.location.href = "dashboard.html";
+        }
+
+        function getUsers() {
+            return JSON.parse(localStorage.getItem("et_users")) || [];
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem("et_users", JSON.stringify(users));
+        }
+
+        function switchTab(tab) {
+            document.getElementById("login-form").classList.toggle("hidden", tab !== "login");
+            document.getElementById("signup-form").classList.toggle("hidden", tab !== "signup");
+            document.getElementById("tab-login").classList.toggle("active", tab === "login");
+            document.getElementById("tab-signup").classList.toggle("active", tab === "signup");
+            clearErrors();
+        }
+
+        function clearErrors() {
+            document.getElementById("login-error").textContent = "";
+            document.getElementById("signup-error").textContent = "";
+            document.getElementById("signup-success").textContent = "";
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById("login-username").value.trim();
+            const password = document.getElementById("login-password").value;
+
+            const users = getUsers();
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                localStorage.setItem("currentUser", JSON.stringify(user));
+                window.location.href = "dashboard.html";
+            } else {
+                document.getElementById("login-error").textContent = "Invalid username or password.";
+            }
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const fullname = document.getElementById("signup-fullname").value.trim();
+            const username = document.getElementById("signup-username").value.trim();
+            const password = document.getElementById("signup-password").value;
+
+            if (username.length < 3) {
+                document.getElementById("signup-error").textContent = "Username must be at least 3 characters.";
+                return;
+            }
+
+            const users = getUsers();
+            if (users.find(u => u.username === username)) {
+                document.getElementById("signup-error").textContent = "Username already taken.";
+                return;
+            }
+
+            users.push({ fullname, username, password, createdAt: new Date().toISOString() });
+            saveUsers(users);
+
+            document.getElementById("signup-error").textContent = "";
+            document.getElementById("signup-success").textContent = "Account created! You can now login.";
+            document.getElementById("signup-form").reset();
+
+            setTimeout(() => switchTab("login"), 1500);
+        }
+    </script>
+
+</body>
+
+</html>
